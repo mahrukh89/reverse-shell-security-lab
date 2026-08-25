@@ -1,0 +1,11 @@
+# Python Standard Library modules only — no external dependencies required
+# All imports (socket, subprocess, os, time) are built into Python 3
+
+# Python version requirement
+# python >= 3.6
+
+# For Ubuntu: run with
+#   python3 scripts/ubuntu_reverse_shell.py
+
+# For Android (Termux): run with
+#   python3 scripts/android_reverse_shell.py

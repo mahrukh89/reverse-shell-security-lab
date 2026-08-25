@@ -1,0 +1,22 @@
+# Log files generated during lab
+command_log.txt
+connection_log.txt
+revshell_log.txt
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Wireshark captures
+*.pcap
+*.pcapng
+*.cap
+
+# Sensitive files
+*.key
+*.pem
